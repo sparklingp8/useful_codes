@@ -1,141 +1,122 @@
-Here is a clean, ready-to-use **README.md** for your PowerShell script.
-You can copy-paste it directly into a file named **README.md**.
+Here’s a clean, professional **README.md** for your script:
 
 ---
 
-# 📁 File Organizer Script (PowerShell – Windows 11)
+# 📂 Files Organizer Script (Linux)
 
-This PowerShell script automatically organizes your photos, videos, PDFs, and other files into **year-based folders**.
-It also auto-splits large photo folders into `photos`, `photos_2`, `photos_3`, … if a folder exceeds **500 files**.
-
----
-
-## ✅ Features
-
-* Automatically detects file type (photos, videos, PDF, others)
-* Organizes files by **year** using the file’s last modified timestamp
-* Auto-splits photo folders (ex: `photos`, `photos_2`, `photos_3`, …)
-* Works recursively inside all subfolders
-* Removes all empty folders after organizing
-* Skips the script file itself
+A simple yet powerful Bash script to automatically organize your photos, videos, and PDFs into **year-based folders**, with photos further split into numbered subfolders (e.g., `photos`, `photos_2`, `photos_3`, …) once a folder exceeds a configurable limit.
 
 ---
 
-## 📂 Folder Structure Example
+## ✨ Features
 
-```
-2020/
-    photos/
-    photos_2/
-    videos/
-    pdf/
-    others/
+* Organizes files by **year** based on file modification time
 
-2021/
-    photos/
-    videos/
-    others/
-```
+  * Example: `2023/photos/`, `2024/videos/`, `2022/pdf/`
+* Automatically classifies files into:
 
----
-
-## 🛠 Supported File Types
-
-### Photos
-
-`jpg, jpeg, png, gif, bmp, tiff, webp, heic, heif`
-
-### Videos
-
-`mp4, mov, mkv, avi, mpeg, mpg, m4v, webm`
-
-### PDF
-
-`pdf`
-
-### Everything else → `others/`
+  * **Photos:** jpg, jpeg, png, gif, bmp, tiff, webp, heic, heif
+  * **Videos:** mp4, mov, mkv, avi, mpeg, mpg, m4v, webm
+  * **PDFs:** pdf
+  * All other files go into `others/`
+* Auto-splits photo folders after reaching **MAX_FILES** (default: 500)
+  → creates `photos`, `photos_2`, `photos_3`, etc.
+* Deletes all empty folders after organizing.
+* Safe: Skips moving the script itself.
 
 ---
 
-## 📦 Installation
+## 🛠️ How It Works
 
-1. Save the script as:
+1. Takes the **directory where the script is run** as `BASE_DIR`.
+2. Scans recursively for all files.
+3. Detects the file type based on extension.
+4. Extracts the file’s **YEAR** using:
 
-```
-organize.ps1
+   ```bash
+   date -r "$FILE" +"%Y"
+   ```
+5. Moves the file into:
+
+   ```
+   BASE_DIR/YEAR/<photos|videos|pdf|others>
+   ```
+6. Photo folders auto-grow:
+
+   * If `photos` has ≥500 files → use/create `photos_2`
+   * If `photos_2` has ≥500 → use/create `photos_3`
+   * And so on.
+
+---
+
+## ▶️ Usage
+
+### 1. Save the script
+
+Save the script as `organize.sh`.
+
+### 2. Make it executable
+
+```bash
+chmod +x organize.sh
 ```
 
-2. Place the script **in the folder you want to organize**.
+### 3. Run it in the folder that contains your files
 
----
-
-## ▶️ How to Run
-
-Open PowerShell in the folder and run:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```bash
+./organize.sh
 ```
 
-Then run the script:
+That's it! The folder will now be neatly organized.
 
-```powershell
-.\organize.ps1
+---
+
+## ⚙️ Configuration
+
+### Change max photos per folder
+
+Modify this line:
+
+```bash
+MAX_FILES=500
+```
+
+### Supported file types
+
+You can edit the extension lists:
+
+```bash
+PHOTO_EXT="jpg jpeg png gif bmp tiff webp heic heif"
+VIDEO_EXT="mp4 mov mkv avi mpeg mpg m4v webm"
+PDF_EXT="pdf"
 ```
 
 ---
 
-## ⚙️ How It Works (Internal Logic)
+## 🧹 What Happens After Execution?
 
-### 1. Detect base directory
-
-The script runs inside the current folder.
-
-### 2. Read all files recursively
-
-`Get-ChildItem -Recurse -File`
-
-### 3. Extract:
-
-* File extension
-* Year from timestamp
-* Category (photo, video, pdf, others)
-
-### 4. Create year folder
-
-Example: `2022/`
-
-### 5. If photos → use *Choose-Folder*
-
-This keeps each photo directory below the configured limit (**500 files**).
-
-### 6. Move file into correct directory
-
-### 7. Cleanup
-
-Delete all empty folders left behind.
+* Files neatly moved into structured directories.
+* All empty folders anywhere under `BASE_DIR` are removed.
+* A summary prints as files are moved.
 
 ---
 
-## ⚠️ Notes / Warnings
+## 📌 Notes
 
-* This script **moves** files (not copies)
-* Removing empty folders is permanent
-* Make a backup if organizing important data
-* Requires PowerShell 5+ (default in Windows 10/11)
+* The script uses **modification time**, not EXIF metadata.
+* Works on macOS & Linux (BSD/GNU `find`, `date`, `tr` compatible).
+* Does not overwrite existing files—mv will prompt or fail if conflicts occur.
 
 ---
 
-## ✔ Example Output
+## ✔️ Example Output
 
 ```
-Moved: D:\Pics\IMG_001.jpg → D:\Pics\2020\photos\
-Moved: D:\Videos\movie.mp4 → D:\Pics\2020\videos\
-Moved: D:\Docs\file.pdf → D:\Pics\2020\pdf\
----------------------------------------
-   ✔ Organizing complete!
-   ✔ Empty folders removed.
----------------------------------------
+Moved: IMG_0012.jpg → 2023/photos/
+Moved: IMG_0013.jpg → 2023/photos/
+Moved: vacation.mp4 → 2022/videos/
+🧹 Cleaning up empty folders...
+🗑️ All empty folders removed.
 ```
 
 ---
